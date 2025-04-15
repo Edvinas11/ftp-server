@@ -93,16 +93,19 @@ while True:
     # STOR (upload)
     elif base_cmd == "STOR" and len(cmd) > 1:
         filename = cmd[1]
-        if not os.path.exists(filename):
+        file_path = os.path.join(CLIENT_DIR, filename)
+        
+        if not os.path.exists(file_path):
             print("File does not exist.")
             continue
+
         data_socket = open_data_connection(control_socket)
         if data_socket:
             control_socket.sendall(f"STOR {filename}\r\n".encode())
             resp = control_socket.recv(1024).decode()
             print(resp.strip())
             if resp.startswith("150"):
-                with open(filename, 'rb') as f:
+                with open(file_path, 'rb') as f:
                     data_socket.sendfile(f)
                 data_socket.close()
                 print(control_socket.recv(1024).decode())  # 226
